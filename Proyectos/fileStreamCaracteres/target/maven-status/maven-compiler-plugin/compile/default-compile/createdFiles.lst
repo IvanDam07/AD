@@ -1,0 +1,7 @@
+com\isc\filestreamcaracteres\modelo\Escritura.class
+com\isc\filestreamcaracteres\vista\interfazVista.class
+com\isc\filestreamcaracteres\FileStreamCaracteres.class
+com\isc\filestreamcaracteres\modelo\Fichero.class
+com\isc\filestreamcaracteres\controlador\controlFileStreams.class
+com\isc\filestreamcaracteres\modelo\Lectura.class
+com\isc\filestreamcaracteres\vista\vistaTextoFileStreams.class

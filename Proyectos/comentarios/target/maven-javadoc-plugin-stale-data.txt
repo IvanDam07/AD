@@ -1,0 +1,41 @@
+-J-Duser.language=
+-J-Duser.country=
+@options
+@packages
+-encoding
+'UTF-8'
+-protected
+-source
+'22'
+-sourcepath
+'C:/Users/b15-12m/Documents/NetBeansProjects/comentarios/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2024. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/b15-12m/Documents/NetBeansProjects/comentarios/target/reports/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'comentarios 1.0-SNAPSHOT API'
+-use
+-version
+-windowtitle
+'comentarios 1.0-SNAPSHOT API'
+com.isc.comentarios
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\src\main\java = 1726052856094
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\allclasses-index.html = 1726054295614
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\allpackages-index.html = 1726054295617
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\element-list = 1726054295587
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\help-doc.html = 1726054295633
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\index-all.html = 1726054295627
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\index.html = 1726054295630
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\member-search-index.js = 1726054295620
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\module-search-index.js = 1726054295618
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\overview-tree.html = 1726054295607
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\package-search-index.js = 1726054295619
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\search.html = 1726054295629
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\tag-search-index.js = 1726054295621
+C:\Users\b15-12m\Documents\NetBeansProjects\comentarios\target\reports\apidocs\type-search-index.js = 1726054295619

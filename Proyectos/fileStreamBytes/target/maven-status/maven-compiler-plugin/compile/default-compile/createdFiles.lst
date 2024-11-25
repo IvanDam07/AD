@@ -1,0 +1,5 @@
+com\isc\filestreambytes\modelo\Copia.class
+com\isc\filestreambytes\modelo\Fichero.class
+com\isc\filestreambytes\FileStreamBytes.class
+com\isc\filestreambytes\modelo\Escritura.class
+com\isc\filestreambytes\modelo\Lectura.class

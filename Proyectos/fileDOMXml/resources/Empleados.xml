@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Empleados>
     <Empleado>
-        <identificador>1</identificador>
+        <Identificador>1</Identificador>
+        <Apellido>Ramírez</Apellido>
+        <Departamento>7</Departamento>
+        <Salario>1000.0</Salario>
+        <Cargo>Consultor</Cargo>
     </Empleado>
     <Empleado>
-        <identificador>2</identificador>
+        <Identificador>2</Identificador>
+        <Apellido>Chavez</Apellido>
+        <Departamento>10</Departamento>
+        <Salario>500.0</Salario>
+        <Cargo>Administrador</Cargo>
     </Empleado>
     <Empleado>
-        <identificador>3</identificador>
+        <Identificador>3</Identificador>
+        <Apellido>Gascón</Apellido>
+        <Departamento>21</Departamento>
+        <Salario>600.0</Salario>
+        <Cargo>Por Especificar</Cargo>
     </Empleado>
 </Empleados>
