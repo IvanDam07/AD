@@ -344,7 +344,22 @@ public class Departamento {
         
     }
     
-    
+    public void insertarDepartamento(OperacionesBBDD bbdd, int dept_no, String dnombre, String localidad) {    
+        try {
+            Optional<ResultSet> rs = bbdd.insert("INSERT INTO departamentos VALUES (?, ?, ?)", dept_no, dnombre, localidad);
+            
+//            if(rs.isPresent()) {
+//                while(rs.get().next()) {
+//                    System.out.println("Departamento número: " + rs.get().getInt("dept_no") +
+//                            ", Nombre departamento: " + rs.get().getString("dnombre") +
+//                            ", Localidad: " + rs.get().getString("localidad"));                          
+//                }
+//            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Empleado.class.getName()).log(Level.SEVERE, null, ex);            
+        }
+        
+    }
     
     
     @Override

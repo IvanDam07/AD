@@ -254,14 +254,29 @@ public class Empleado {
             return Optional.empty();
         }        
     }
-    
-    public static Optional<ResultSet> obtenerEmpleadoConMayorSalario(OperacionesBBDD bbdd) {
+     
+    /*
+    Método que muestra el apellido, salario y nombre de departamento del empleado con maximo salario
+    */
+    public void obtenerEmpleadoConMayorSalario(OperacionesBBDD bbdd) {
         try {
-            return bbdd.select("SELECT e.apellido, e.salario, d.dnombre FROM empleados e, departamentos d WHERE e.dept_no = d.dept_no AND e.salario = (SELECT MAX(salario) FROM empleados");
+            
+            Optional<ResultSet> rs =  bbdd.select("SELECT e.apellido, e.salario, d.dnombre FROM empleados e, departamentos d WHERE e.dept_no = d.dept_no AND e.salario = (SELECT MAX(salario) FROM empleados");
+            
+            if(rs.isPresent()) {
+                while(rs.get().next()) {
+                    System.out.println("Apellido: " + rs.get().getString("apellido") + 
+                            ", Salario: " + rs.get().getString("salario") +
+                            ", Nombre departamento: " + rs.get().getString("dnom"));
+                }
+            }
         } catch (SQLException ex) {
-            Logger.getLogger(Empleado.class.getName()).log(Level.SEVERE, null, ex);
-            return Optional.empty();
+            Logger.getLogger(Empleado.class.getName()).log(Level.SEVERE, null, ex);            
         }
+    }        
+    
+    public void insertarEmpleadosEnDepartamento(OperacionesBBDD bbdd, int dept_no ) {
+        Optional<ResultSet> rs = bbdd.insert(apellido, params)
     }
     
     @Override

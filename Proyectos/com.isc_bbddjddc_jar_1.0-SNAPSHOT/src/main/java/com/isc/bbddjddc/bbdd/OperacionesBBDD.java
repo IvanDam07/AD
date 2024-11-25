@@ -58,8 +58,8 @@ public class OperacionesBBDD {
         
         try {
             this.propiedades = new Properties();
-            this.propiedades.setProperty("user", "dam2");
-            this.propiedades.setProperty("password", "dam2");
+            this.propiedades.setProperty("user", "dam2"); //cambiar dam2 por examen
+            this.propiedades.setProperty("password", "dam2"); //cambiar dam2 por examen
             this.propiedades.setProperty("bbdd", "free");
             Class.forName(driver);
             this.conexion = DriverManager.getConnection(urlconnection, propiedades);
@@ -90,10 +90,10 @@ public class OperacionesBBDD {
     public Optional<ResultSet> insert(String insertSQL,Object... params) throws SQLException{
         
         //el return generated keys devuelve la clave generada
-        preparedStatement = conexion.prepareStatement(insertSQL,PreparedStatement.RETURN_GENERATED_KEYS,ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
+        preparedStatement = conexion.prepareStatement(insertSQL,PreparedStatement.RETURN_GENERATED_KEYS);
+        //ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE
         
-        
-        //insert into Depatrtamentos values(?,?,?)"
+        //insert into Departamentos values(?,?,?)"
         //por cada iteracion añade el valor que le pasamos
         
         for(int i=0; i<params.length; i++){

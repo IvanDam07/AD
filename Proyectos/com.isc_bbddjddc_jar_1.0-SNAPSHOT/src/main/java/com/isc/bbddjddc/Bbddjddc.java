@@ -81,19 +81,23 @@ public class Bbddjddc {
         }
         */
         
-        Optional<ResultSet> empleados = Empleado.obtenerEmpleadoConMayorSalario(bbdd);
-        if(empleados.isPresent()) {
-            try {
-                ResultSet rs = empleados.get();
-                while(rs.next()) {
-                    System.out.println("Apellido: " + rs.getString("apellido") + 
-                            ", Salario: " + rs.getString("salario") +
-                            ", Nombre departamento: " + rs.getString("dnom"));
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(Bbddjddc.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+//        Optional<ResultSet> empleados = Empleado.obtenerEmpleadoConMayorSalario(bbdd);
+//        if(empleados.isPresent()) {
+//            try {
+//                ResultSet rs = empleados.get();
+//                while(rs.next()) {
+//                    System.out.println("Apellido: " + rs.getString("apellido") + 
+//                            ", Salario: " + rs.getString("salario") +
+//                            ", Nombre departamento: " + rs.getString("dnom"));
+//                }
+//            } catch (SQLException ex) {
+//                Logger.getLogger(Bbddjddc.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+        
+        Departamento dep = new Departamento();
+        dep.insertarDepartamento(bbdd, 15,"INFORMÁTICA","MADRID");
+        
         bbdd.cerrarConexion();
                 
     }
