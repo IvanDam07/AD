@@ -22,84 +22,36 @@ public class Bbddjddc {
 
     private static OperacionesBBDD bbdd = OperacionesBBDD.getInstance();
     private static Optional<ResultSet> rs;
-    
 
     public static void main(String[] args) throws SQLException {
-        
+
         bbdd.abrirConexion();
-       
-//        Departamento departamento = new Departamento(2,"Ventas","Logroño");
-//        departamento.insertar(bbdd);
-//        
-//        departamento = new Departamento(3,"Logística","Cuenca");
-//        departamento.insertar(bbdd);
 
-//        Departamento d = new Departamento();
-//        d.selectById(bbdd,2);
-//        
-//        System.out.println(d);
-//        
-//        d.setLoc("Logroño");
-//        d.update(bbdd);
-//        
-//        d.selectById(bbdd, 2);
-//        System.out.println(d);
-//        
-//        Departamento.delete(bbdd,1);
+//        Departamento dep = new Departamento();
+//        dep.insertarDepartamento(bbdd, 15,"INFORMÁTICA","MADRID");
+        // Creamos dos empleados en el departamento 15
+//        Empleado emp1 = new Empleado();
+//        emp1.insertarEmpleadoEnDepartamento(bbdd, 101, "PEREZ", "EMPLEADO", 0, "2024-11-26", 3000, 500, 15);
+//
+//        Empleado emp2 = new Empleado();
+//        emp2.insertarEmpleadoEnDepartamento(bbdd, 102, "GARCIA", "EMPLEADO", 101, "2024-11-26", 3500, 0, 15);
+        Empleado emp = new Empleado();
+        //emp.actualizarSalario(bbdd, 15, 100);
 
-            //si nos dice en el examen que si ya esta que le digamos al usuario que esta duplicado lo hacemos capturando las excepciones como hasta ahora, no haciendo un select antes
-            
-            
-//        rs = Departamento.selectAll(bbdd);
-//        int nFilas  = bbdd.obtenerNumeroFilasDevueltas(rs);
-//        System.out.println("Filas: "+nFilas);
-
-//        Departamento d = new Departamento(78,"Departamento1","Daimiel");
-        //d.update(rs.get());
+        //emp.llamarPSubidaSal(bbdd, 15, 100);
+//        int numEmpleados = Departamento.llamarFNEmpleado(bbdd, 15);
+//        System.out.println("Número de empleados en el departamento 15: " +numEmpleados);
+        //Empleado.mostrarNominaEmpleados(bbdd);
         
-//        d.insertar(rs.get());
-        
-        
-        
-        /* ESTO ES PARA: Sentencias de Manipulación Ejecutando DML (punto 2)
-        int dep = 10;
-        Optional<ResultSet> empleados = Empleado.obtenerEmpleadoPorDepartamentos(bbdd, dep);
-        
-        if (empleados.isPresent()) {
-            try {
-                ResultSet rs = empleados.get();
-                while(rs.next()) {
-                    System.out.println("Apellido: " + rs.getString("apellido") +
-                            ", Oficio: " + rs.getString("oficio") +
-                            ", Salario: " + rs.getDouble("salario"));
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(Bbddjddc.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
-            System.out.println("No se encontraron empleados en ese id de departamento.");
-        }
-        */
-        
-//        Optional<ResultSet> empleados = Empleado.obtenerEmpleadoConMayorSalario(bbdd);
-//        if(empleados.isPresent()) {
-//            try {
-//                ResultSet rs = empleados.get();
-//                while(rs.next()) {
-//                    System.out.println("Apellido: " + rs.getString("apellido") + 
-//                            ", Salario: " + rs.getString("salario") +
-//                            ", Nombre departamento: " + rs.getString("dnom"));
-//                }
-//            } catch (SQLException ex) {
-//                Logger.getLogger(Bbddjddc.class.getName()).log(Level.SEVERE, null, ex);
-//            }
+//        Optional<ResultSet> rs = Empleado.selectAll(bbdd);
+//        if (rs.isPresent()) {
+//            int totalFilas = Empleado.obtenerNumeroFilas(rs.get());
+//            System.out.println("Total de filas: " + totalFilas);
 //        }
-        
-        Departamento dep = new Departamento();
-        dep.insertarDepartamento(bbdd, 15,"INFORMÁTICA","MADRID");
-        
+
+        Departamento.mostrarInformacionTabla(bbdd, "EMPLEADOS");
         bbdd.cerrarConexion();
-                
+
     }
-    
+
 }
