@@ -11,7 +11,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,12 +31,12 @@ public class ProyectoJPAv2 {
     static DepartamentosJpaController departamentosJpaController;
     static Empleados empleado;
     Scanner scanner = new Scanner(System.in);
-    
+
     public static void main(String[] args) {
 
         try {
 
-            inicializarFactory();
+            //inicializarFactory();
 
 //            leerUnRegistro();
 //            
@@ -66,8 +69,37 @@ public class ProyectoJPAv2 {
 //            borrarDatos((short)99);
 
             
-            cierraFactory();
-
+            //cierraFactory();
+            
+            inicializaFactoryController();
+            
+            DepartamentosJpaController departamentosJpaController = new DepartamentosJpaController(emfactory);
+            
+            Departamentos departamento = new Departamentos();
+            
+            departamento.setDeptNo((short) 77);
+            departamento.setDnombre("BIG DATA");
+            departamento.setLoc("TALAVERA");
+            departamento.setEmpleadosCollection(null);
+            
+//            Empleados empleado = new Empleados();
+            
+//            Collection<Empleados> empleadosCollection = new ArrayList<Empleados>();
+//            
+//            empleado.setEmpNo((short) 7777);
+//            empleado.setApellido("ROBLES");
+//            empleado.setSalario(BigDecimal.valueOf(2000));
+//            empleado.setOficio("ANALISTA");
+//            empleado.setDir((short) 7839);
+//
+//            empleadosCollection.add(empleado);
+//            
+//            departamento.setEmpleadosCollection(empleadosCollection);
+            
+            departamentosJpaController.create(departamento);                      
+            
+            cierraFactoryController();
+            
 //            departamentosJpaController.create(departamentos);
         } catch (Exception ex) {
             Logger.getLogger(ProyectoJPAv2.class.getName()).log(Level.SEVERE, null, ex);
@@ -75,6 +107,14 @@ public class ProyectoJPAv2 {
 
     }
 
+    public static void inicializaFactoryController() {
+        emfactory = Persistence.createEntityManagerFactory("com.mmc_proyectoJPAv2_jar_1.0-SNAPSHOTPU");        
+    }
+    
+    public static void cierraFactoryController() {
+        emfactory.close();
+    }
+    
     public static void inicializarFactory() {
         emfactory = Persistence.createEntityManagerFactory("com.mmc_proyectoJPAv2_jar_1.0-SNAPSHOTPU");
         entitymanager = emfactory.createEntityManager();
@@ -158,32 +198,52 @@ public class ProyectoJPAv2 {
 
     public static void insertarEmpDatosPedidos() {
         Scanner scanner = new Scanner(System.in);
-        
+
         Empleados empleado;
         empleado = new Empleados();
-        
+
         System.out.println("Ingresa los siguientes datos: ");
-        System.out.print("Número empleado: ");       
-        int empNo = scanner.nextInt();        
-        empleado.setEmpNo((short)empNo);
-        
+        System.out.print("Número empleado: ");
+        int empNo = scanner.nextInt();
+        empleado.setEmpNo((short) empNo);
+
         System.out.println("Apellido: ");
         String apellido = scanner.next();
         empleado.setApellido(apellido);
-        
+
         System.out.println("Oficio: ");
         String oficio = scanner.next();
         empleado.setOficio(oficio);
-        
+
         System.out.println("Dir: ");
         int dir = scanner.nextInt();
-        empleado.setDir((short)dir);
-        
-        System.out.println("Fecha alta: ");
+        empleado.setDir((short) dir);
+
+        System.out.println("Fecha alta (dd/MM/yyyy): ");
         String fechaAlt = scanner.next();
-        empleado.setFechaAlt(new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(fechaAlt).getTime()));
-        
+        try {
+            empleado.setFechaAlt(new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(fechaAlt).getTime()));
+        } catch (ParseException e) {
+            System.err.println("Formato de fecha inválido. Debe ser dd/MM/yyyy.");
+            return; // Salir del método
+        }
+
+        System.out.println("Salario: ");
+        BigDecimal salario = scanner.nextBigDecimal();
+        empleado.setSalario(salario);
+
+        System.out.println("Comisión: ");
+        BigDecimal comision = scanner.nextBigDecimal();
+        empleado.setComision(comision);
+
+        System.out.println("Dept número: ");
+        short numDept = scanner.nextShort();
+        Departamentos dept = new Departamentos(); // Asume que tienes una clase Departamentos
+        dept.setDeptNo(numDept);
+        empleado.setDeptNo(dept);
+
     }
+
     public static void modificarDatos() {
         short id = 99;
         departamento = entitymanager.find(Departamentos.class, id);
@@ -206,12 +266,12 @@ public class ProyectoJPAv2 {
         } else {
             System.out.println("No existe el registro con ID: " + id);
         }
-        
+
         entitymanager.getTransaction().commit();
     }
 
     public static void borrarDatos(Short idDepart) {
-        
+
         departamento = entitymanager.find(Departamentos.class, idDepart);
 
         entitymanager.getTransaction().begin();
@@ -219,22 +279,22 @@ public class ProyectoJPAv2 {
         //esperar();
         entitymanager.getTransaction().commit();
     }
-    
+
     /**
      * Método Practica en casa punto 3
+     *
      * @param idEmp id del empleado
      * @param salario salario nuevo del empleado
      * @param deptNo departamento nuevo del empleado
      */
     public static void modificarSalarioDepart(int idEmp, BigDecimal salario, Departamentos deptNo) {
         empleado = entitymanager.find(Empleados.class, idEmp);
-        
+
         entitymanager.getTransaction().begin();
         empleado.setSalario(salario);
         empleado.setDeptNo(deptNo);
-        
+
         entitymanager.getTransaction().commit();
     }
-    
-    
+
 }

@@ -2,7 +2,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package com.mmc.proyectojpav2;
 
 import static com.mmc.proyectojpav2.ProyectoJPAv2.departamento;
@@ -26,13 +25,12 @@ import java.util.List;
 /**
  *
  * @author MMC by Mateo Molina Campos
- * @version 1.0
- * Created on 29 nov 2024
+ * @version 1.0 Created on 29 nov 2024
  *
  */
 public class DepartamentosJpaController implements Serializable {
-    
-        private EntityManagerFactory emf = null;
+
+    private EntityManagerFactory emf = null;
 
     public DepartamentosJpaController(EntityManagerFactory emf) {
         this.emf = emf;
@@ -202,22 +200,22 @@ public class DepartamentosJpaController implements Serializable {
         }
     }
 
-    public static void leerUnRegistroRelacionado() {        
+    public static void leerUnRegistroRelacionado() {
         short id = 10;
-        
+
         departamento = entitymanager.find(Departamentos.class, id);
-        
+
         if (departamento != null) {
             System.out.println("Dept NAME :" + departamento.getDnombre());
-            
+
             Collection<Empleados> list = departamento.getEmpleadosCollection();
-            
-            for (Empleados emple:list) {
+
+            for (Empleados emple : list) {
                 System.out.println("Emple NAME :" + emple.getApellido());
             }
         } else {
             System.out.println("NO existe el registro");
         }
     }
-    
+
 }
