@@ -47,25 +47,30 @@ public class Empleados implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @Basic(optional = false)
-    @NotNull
-    @Column(name = "EMP_NO")
+    @NotNull    
+    @Column(name = "EMP_NO", length=4)
     private Short empNo;
-    @Size(max = 10)
-    @Column(name = "APELLIDO")
+        
+    @Column(name = "APELLIDO", nullable=false, length=10)
     private String apellido;
-    @Size(max = 10)
-    @Column(name = "OFICIO")
+       
+    @Column(name = "OFICIO", nullable=false, length=10)
     private String oficio;
-    @Column(name = "DIR")
+        
+    @Column(name = "DIR", length=4)
     private Short dir;
+    
     @Column(name = "FECHA_ALT")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date fechaAlt;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
-    @Column(name = "SALARIO")
+    
+    @Column(name = "SALARIO", nullable=false, precision=6, scale=2)
     private BigDecimal salario;
-    @Column(name = "COMISION")
+    
+    @Column(name = "COMISION", nullable=false, precision=6, scale=2)
     private BigDecimal comision;
+    
     @JoinColumn(name = "DEPT_NO", referencedColumnName = "DEPT_NO")
     @ManyToOne
     private Departamentos deptNo;
