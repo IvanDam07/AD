@@ -1,0 +1,62 @@
+Obtener los nodos denominación y precio de todos los productos:
+//produc/denominacion | //produc/precio
+
+Obtener los nodos de los productos que sean placas base:
+//produc[contains(denominacion, 'Placa Base')]
+
+Obtener los nodos de los productos con precio mayor de 60 € y de la zona 20:
+//produc[precio > 60 and cod_zona = 20]
+
+Obtener el número de productos que sean memorias y de la zona 10:
+count(//produc[contains(denominacion, 'Memoria') and cod_zona = 10])
+
+Obtener la media de precio de los micros:
+avg(//produc[contains(denominacion, 'Micro')]/precio)
+
+Obtener los datos de los productos cuyo stock mínimo sea mayor que su stock actual:
+//produc[stock_minimo > stock_actual]
+
+Obtener el nombre de producto y el precio de aquellos cuyo stock mínimo sea mayor que su stock actual y sean de la zona 40:
+//produc[stock_minimo > stock_actual and cod_zona = 40]/(denominacion | precio)
+
+Obtener el producto más caro:
+//produc[precio = max(//produc/precio)]
+
+Obtener el producto más barato de la zona 20:
+//produc[cod_zona = 20 and precio = min(//produc[cod_zona = 20]/precio)]
+
+Obtener el producto más caro de la zona 10:
+//produc[cod_zona = 10 and precio = max(//produc[cod_zona = 10]/precio)]
+
+Obtener los datos de las cuentas bancarias cuyo tipo sea AHORRO:
+//cuenta[@tipo="AHORRO"]
+
+Obtener por cada sucursal la concatenación de su código, y el número de cuentas del tipo AHORRO que tiene:
+//sucursal/concat(@codigo, " - ", count(cuenta[@tipo="AHORRO"]))
+
+Obtener las cuentas de tipo PENSIONES de la sucursal con código SUC3:
+//sucursal[@codigo="SUC3"]/cuenta[@tipo="PENSIONES"]
+
+Obtener por cada sucursal la concatenación de los datos, código sucursal, director, y total saldo haber:
+//sucursal/concat(@codigo, " - ", director, " - ", sum(cuenta/saldohaber))
+
+Obtener todos los elementos de las sucursales con más de 3 cuentas:
+//sucursal[count(cuenta) > 3]
+
+Obtener todos los elementos de las sucursales con más de 3 cuentas del tipo AHORRO:
+//sucursal[count(cuenta[@tipo="AHORRO"]) > 3]
+
+Obtener los nodos del director y la población de las sucursales con más de 3 cuentas:
+//sucursal[count(cuenta) > 3]/(director | poblacion)
+
+Obtener el número de sucursales cuya población sea Madrid:
+count(//sucursal[poblacion="Madrid"])
+
+Obtener por cada sucursal, su código y la suma de las aportaciones de las cuentas del tipo PENSIONES:
+//sucursal/concat(@codigo, " - ", sum(cuenta[@tipo="PENSIONES"]/aportacion))
+
+Obtener los nodos número de cuenta, nombre de cuenta y el saldo haber de las cuentas con saldo haber mayor de 10000:
+//cuenta[saldohaber > 10000]/(numero | nombre | saldohaber)
+
+Obtener por cada sucursal con más de 3 cuentas del tipo AHORRO, su código y la suma del saldo debe de esas cuentas:
+//sucursal[count(cuenta[@tipo="AHORRO"]) > 3]/concat(@codigo, " - ", sum(cuenta[@tipo="AHORRO"]/saldodebe))
