@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Empleados>   
+    <Empleado>        
+        <identificador>1</identificador> 
+        <Cargo>Por especificar</Cargo>
+        <Salario>52003</Salario>
+        <Departamento>Por especificar</Departamento>
+    </Empleado>
+    <Empleado>      
+        <identificador>2</identificador> 
+        <Cargo>Por especificar</Cargo>
+        <Salario>Por especificar</Salario>
+        <Departamento>Por especificar</Departamento>
+    </Empleado>
+    <Empleado>        
+        <identificador>3</identificador>
+        <Cargo>Por especificar</Cargo>
+        <Salario>Por especificar</Salario>
+        <Departamento>Por especificar</Departamento>
+    </Empleado>
+</Empleados>

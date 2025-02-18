@@ -1,0 +1,5 @@
+com\mmc\clasefile\controlador\ControlCarpeta.class
+com\mmc\clasefile\ClaseFile.class
+com\mmc\clasefile\modelo\Carpeta.class
+com\mmc\clasefile\vista\InterfazVista.class
+com\mmc\clasefile\vista\CarpetaVistaTexto.class

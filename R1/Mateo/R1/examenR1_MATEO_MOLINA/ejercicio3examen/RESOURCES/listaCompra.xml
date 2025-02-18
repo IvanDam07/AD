@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<productos>
+            
+    
+    
+    <producto>
+                        
+        
+        <nombre>leche</nombre>
+                        
+        
+        <cantidad>2</cantidad>
+                        
+        
+        <supermercado>mercadona</supermercado>
+                    
+    
+    </producto>
+        
+    
+    <producto>
+                
+        <nombre>huevos</nombre>
+                
+        <cantidad>1</cantidad>
+                
+        <supermercado>lidl</supermercado>
+            
+    </producto>
+    
+    <producto>
+        <nombre>huevos</nombre>
+        <cantidad>3</cantidad>
+        <supermercado>lidl</supermercado>
+    </producto>
+</productos>
