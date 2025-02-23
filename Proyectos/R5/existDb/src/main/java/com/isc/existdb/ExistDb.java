@@ -3,6 +3,7 @@
  */
 package com.isc.existdb;
 
+import java.io.StringWriter;
 import static java.lang.String.format;
 import static java.text.MessageFormat.format;
 import java.util.Scanner;
@@ -501,4 +502,60 @@ public class ExistDb {
                 + "  /sucursales/sucursal[@codigo='SUC2']/director\n"
                 + "as 'responsable'");
     }
+    
+    /**
+     * MÉTODOS JUAN
+     */
+    private boolean existeNodo(String inputConsulta) {
+    try {
+      XQExpression xqConsulta = connection.createExpression();
+      String cadenaConsulta = "exists(" + inputConsulta + ")";
+      XQResultSequence xqResultado = xqConsulta.executeQuery(cadenaConsulta);
+        
+      return xqResultado.next() && xqResultado.getBoolean();
+    } catch (XQException ex) {
+      ex.printStackTrace();
+      return false;
+    }
+  }
+    
+    /**
+     * Si es un atributo
+     * @param inputConsulta 
+     */
+    public void realizarConsulta (String inputConsulta) {
+    try {
+      XQPreparedExpression xqConsulta = connection.prepareExpression(inputConsulta);
+      XQResultSequence xqResultado = xqConsulta.executeQuery();
+      
+      XQResultItem resultItem;
+      while (xqResultado.next()) {
+        resultItem = (XQResultItem) xqResultado.getItem();
+        
+        if (resultItem.getItemType().getBaseType() == XQItemType.XQBASETYPE_STRING) {
+          System.out.println(resultItem.getAtomicValue());
+        } else {
+          System.out.println(eliminarNamespace(resultItem));
+        }
+      }
+    } catch (XQException ex) {
+      ex.printStackTrace();
+    }
+  }
+    
+     // metodo eliminar cabeceras del xml =>
+  private String eliminarNamespace (XQResultItem inputItem) {
+    StringWriter writer = new StringWriter();
+    
+    try {
+      Node node = (Node) inputItem.getNode();
+      
+      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      transformer.transform(new DOMSource(node), new StreamResult(writer));
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    
+    return writer.toString();
+  }
 }
