@@ -1,0 +1,5 @@
+com\mycompany\cambioeuropesetaconmvc\CambioEuroPesetaConMVC.class
+com\mycompany\cambioeuropesetaconmvc\controlador\ControladorEuroPeseta.class
+com\mycompany\cambioeuropesetaconmvc\vista\InterfazVista.class
+com\mycompany\cambioeuropesetaconmvc\vista\VentanaTexto.class
+com\mycompany\cambioeuropesetaconmvc\modelo\CambioEuroPeseta.class
