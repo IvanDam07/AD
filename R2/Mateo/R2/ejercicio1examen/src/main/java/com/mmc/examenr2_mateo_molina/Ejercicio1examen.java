@@ -41,15 +41,15 @@ public class Ejercicio1examen {
        
         
 //-------------------------- LLAMADAS SOLICITADAS --------------------------------------------------
-        m.insertarFilaDrones("A2","Toshiba","E501",0.25,100,10,"Ocaso",4,3,fechaSql,"05123456A");
+        //m.insertarFilaDrones("A2","Toshiba","E501",0.25,100,10,"Ocaso",4,3,fechaSql,"05123456A");
         
         m.mostrarFilaDatosDrones("A2");
         
-        m.eliminarFilasDronesObsoletos(3,fechaSql);
+        //m.eliminarFilasDronesObsoletos(3,fechaSql);
         
-        m.mostarTodosDatos(fechaSql,fechaSql2);
+        //m.mostarTodosDatos(fechaSql,fechaSql2);
         
-        m.cursoRenovacion();
+        //m.cursoRenovacion();
         
         //cierre de conexion
         m.utilidadCerrarConexion();
