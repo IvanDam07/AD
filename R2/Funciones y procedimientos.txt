@@ -1,0 +1,939 @@
+Las funciones devuelven un valor y pueden usarse en consultas SELECT, expresiones y otros bloques PL/SQL.
+
+Ejemplo Básico – Función para calcular el cuadrado de un número
+CREATE OR REPLACE FUNCTION calcular_cuadrado(num IN NUMBER) RETURN NUMBER IS
+BEGIN
+    RETURN num * num;
+END;
+/
+
+
+Ejemplo Intermedio – Función que devuelve el salario de un empleado dado su ID
+CREATE OR REPLACE FUNCTION obtener_salario(emp_id IN NUMBER) RETURN NUMBER IS
+    v_salario NUMBER;
+BEGIN
+    SELECT salario INTO v_salario FROM empleados WHERE id = emp_id;
+    RETURN v_salario;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
+
+
+Ejemplo Avanzado – Función que devuelve el salario con un bono adicional según el cargo
+CREATE OR REPLACE FUNCTION calcular_salario_total(emp_id IN NUMBER) RETURN NUMBER IS
+    v_salario NUMBER;
+    v_bono NUMBER;
+BEGIN
+    SELECT salario, 
+           CASE 
+               WHEN cargo = 'GERENTE' THEN salario * 0.20
+               WHEN cargo = 'ANALISTA' THEN salario * 0.10
+               ELSE salario * 0.05
+           END
+    INTO v_salario, v_bono
+    FROM empleados WHERE id = emp_id;
+
+    RETURN v_salario + v_bono;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
+
+
+Función que devuelve el empleado con el salario más alto de un departamento
+Esta función recibe un departamento y devuelve el nombre del empleado con el salario más alto
+CREATE OR REPLACE FUNCTION obtener_mejor_pagado(p_departamento IN VARCHAR2) RETURN VARCHAR2 IS
+    v_nombre empleados.nombre%TYPE;
+BEGIN
+    SELECT nombre INTO v_nombre 
+    FROM empleados 
+    WHERE departamento = p_departamento
+    ORDER BY salario DESC
+    FETCH FIRST 1 ROW ONLY;
+
+    RETURN v_nombre;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No hay empleados en este departamento';
+END;
+/
+
+Función que calcula el promedio de salarios en un departamento con control de excepciones
+Esta función devuelve el salario promedio en un departamento y maneja excepciones si el departamento no existe.
+CREATE OR REPLACE FUNCTION calcular_promedio_salario(p_departamento IN VARCHAR2) RETURN NUMBER IS
+    v_promedio NUMBER;
+BEGIN
+    SELECT AVG(salario) INTO v_promedio 
+    FROM empleados 
+    WHERE departamento = p_departamento;
+
+    IF v_promedio IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    RETURN v_promedio;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN -1; -- Código especial para indicar que el departamento no existe
+END;
+/
+
+Función que devuelve el total de ventas de un empleado en un período determinado
+Esta función toma un ID de empleado y un rango de fechas y devuelve el total de ventas realizadas.
+CREATE OR REPLACE FUNCTION total_ventas_empleado(
+    p_emp_id IN NUMBER, 
+    p_fecha_inicio IN DATE, 
+    p_fecha_fin IN DATE
+) RETURN NUMBER IS
+    v_total NUMBER := 0;
+BEGIN
+    SELECT NVL(SUM(monto), 0) INTO v_total
+    FROM ventas
+    WHERE empleado_id = p_emp_id AND fecha BETWEEN p_fecha_inicio AND p_fecha_fin;
+
+    RETURN v_total;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+END;
+/
+
+
+FUNCIONES CON CURSORES
+
+Función que devuelve el salario promedio de un departamento
+Esta función usa un cursor explícito para recorrer los salarios de los empleados de un departamento y calcular el promedio.
+CREATE OR REPLACE FUNCTION calcular_promedio_salario(p_departamento VARCHAR2) RETURN NUMBER IS
+    CURSOR c_salarios IS
+        SELECT salario FROM empleados WHERE departamento = p_departamento;
+    
+    v_salario empleados.salario%TYPE;
+    v_total_salario NUMBER := 0;
+    v_contador NUMBER := 0;
+    v_promedio NUMBER;
+BEGIN
+    OPEN c_salarios;
+    LOOP
+        FETCH c_salarios INTO v_salario;
+        EXIT WHEN c_salarios%NOTFOUND;
+
+        v_total_salario := v_total_salario + v_salario;
+        v_contador := v_contador + 1;
+    END LOOP;
+    CLOSE c_salarios;
+
+    IF v_contador = 0 THEN
+        RETURN NULL; -- Si no hay empleados, devolvemos NULL
+    ELSE
+        v_promedio := v_total_salario / v_contador;
+        RETURN v_promedio;
+    END IF;
+END;
+/
+
+
+Función que devuelve el empleado con el salario más alto en un departamento
+Esta función usa un cursor implícito (SELECT INTO) para devolver el mejor pagado.
+
+CREATE OR REPLACE FUNCTION obtener_mejor_pagado(p_departamento VARCHAR2) RETURN VARCHAR2 IS
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    SELECT nombre, salario INTO v_nombre, v_salario 
+    FROM empleados 
+    WHERE departamento = p_departamento
+    ORDER BY salario DESC
+    FETCH FIRST 1 ROW ONLY;
+
+    RETURN v_nombre;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No hay empleados en este departamento';
+END;
+/
+
+----------------------------------------------------------------------------------------------
+
+A diferencia de las funciones, los procedimientos no devuelven un valor directamente, 
+sino que realizan una tarea específica (como insertar o actualizar datos).
+
+Ejemplo Básico – Procedimiento para registrar un empleado
+CREATE OR REPLACE PROCEDURE registrar_empleado(
+    p_id IN NUMBER,
+    p_nombre IN VARCHAR2,
+    p_salario IN NUMBER
+) IS
+BEGIN
+    INSERT INTO empleados (id, nombre, salario) VALUES (p_id, p_nombre, p_salario);
+    COMMIT;
+END;
+/
+
+Ejemplo Intermedio – Procedimiento que actualiza el salario de un empleado
+CREATE OR REPLACE PROCEDURE actualizar_salario(
+    p_id IN NUMBER,
+    p_nuevo_salario IN NUMBER
+) IS
+BEGIN
+    UPDATE empleados SET salario = p_nuevo_salario WHERE id = p_id;
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Empleado no encontrado.');
+END;
+/
+
+Ejemplo Avanzado – Procedimiento con parámetros de entrada y salida para calcular el total de empleados en un departamento
+CREATE OR REPLACE PROCEDURE contar_empleados(
+    p_departamento IN VARCHAR2,
+    p_total OUT NUMBER
+) IS
+BEGIN
+    SELECT COUNT(*) INTO p_total FROM empleados WHERE departamento = p_departamento;
+END;
+/
+
+
+Procedimiento que transfiere dinero entre cuentas con control de errores y transacción
+Este procedimiento transfiere dinero entre dos cuentas y maneja posibles errores como fondos insuficientes.
+CREATE OR REPLACE PROCEDURE transferir_fondos(
+    p_cuenta_origen IN NUMBER, 
+    p_cuenta_destino IN NUMBER, 
+    p_monto IN NUMBER
+) IS
+    v_saldo_origen NUMBER;
+BEGIN
+    -- Obtener saldo de la cuenta origen
+    SELECT saldo INTO v_saldo_origen FROM cuentas WHERE id = p_cuenta_origen FOR UPDATE;
+
+    -- Verificar que haya fondos suficientes
+    IF v_saldo_origen < p_monto THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Fondos insuficientes');
+    END IF;
+
+    -- Realizar la transferencia
+    UPDATE cuentas SET saldo = saldo - p_monto WHERE id = p_cuenta_origen;
+    UPDATE cuentas SET saldo = saldo + p_monto WHERE id = p_cuenta_destino;
+
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20002, 'Una de las cuentas no existe');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20003, 'Error desconocido en la transferencia');
+END;
+/
+
+
+Procedimiento con cursor para listar empleados con salario mayor a un monto dado
+Este procedimiento usa un cursor explícito para recorrer empleados y mostrar solo los que ganan más de cierto valor
+CREATE OR REPLACE PROCEDURE listar_empleados_altos_sueldos(p_sueldo_minimo IN NUMBER) IS
+    CURSOR c_empleados IS
+        SELECT id, nombre, salario FROM empleados WHERE salario > p_sueldo_minimo;
+    
+    v_id empleados.id%TYPE; -- Se ajustará automáticamente al tipo de la columna empleados.id
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_id, v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('ID: ' || v_id || ' - Nombre: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;
+END;
+/
+
+Procedimiento que elimina empleados inactivos y registra en un log
+Este procedimiento elimina empleados que no han registrado actividad en más de un año 
+y los guarda en una tabla de auditoría antes de eliminarlos.
+CREATE OR REPLACE PROCEDURE limpiar_empleados_inactivos IS
+BEGIN
+    INSERT INTO empleados_eliminados (id, nombre, fecha_baja)
+    SELECT id, nombre, SYSDATE
+    FROM empleados
+    WHERE ultima_actividad < ADD_MONTHS(SYSDATE, -12);
+
+    DELETE FROM empleados WHERE ultima_actividad < ADD_MONTHS(SYSDATE, -12);
+
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Empleados inactivos eliminados y registrados en auditoría.');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20004, 'Error al eliminar empleados inactivos');
+END;
+/
+
+
+Procedimiento que lista los empleados de un departamento
+Este procedimiento usa un cursor explícito para mostrar empleados de un departamento
+CREATE OR REPLACE PROCEDURE listar_empleados(p_departamento VARCHAR2) IS
+    CURSOR c_empleados IS
+        SELECT nombre, salario FROM empleados WHERE departamento = p_departamento;
+    
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;
+END;
+/
+
+
+Procedimiento que actualiza salarios de empleados con un cursor FOR UPDATE
+Este procedimiento aumenta los salarios de empleados que ganan menos de un umbral.
+CREATE OR REPLACE PROCEDURE aumentar_salario(p_aumento NUMBER) IS
+    CURSOR c_empleados IS
+        SELECT id, salario FROM empleados WHERE salario < 5000 FOR UPDATE;
+
+    v_id empleados.id%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_id, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        UPDATE empleados 
+        SET salario = salario + p_aumento 
+        WHERE id = v_id;
+    END LOOP;
+    CLOSE c_empleados;
+
+    COMMIT;
+END;
+/
+
+
+Procedimiento con cursor y manejo de excepciones
+Este procedimiento elimina empleados inactivos y los registra en una tabla de auditoría.
+CREATE OR REPLACE PROCEDURE eliminar_empleados_inactivos IS
+    CURSOR c_inactivos IS
+        SELECT id, nombre FROM empleados WHERE ultima_actividad < ADD_MONTHS(SYSDATE, -12);
+
+    v_id empleados.id%TYPE;
+    v_nombre empleados.nombre%TYPE;
+BEGIN
+    OPEN c_inactivos;
+    LOOP
+        FETCH c_inactivos INTO v_id, v_nombre;
+        EXIT WHEN c_inactivos%NOTFOUND;
+
+        INSERT INTO empleados_eliminados (id, nombre, fecha_baja)
+        VALUES (v_id, v_nombre, SYSDATE);
+
+        DELETE FROM empleados WHERE id = v_id;
+    END LOOP;
+    CLOSE c_inactivos;
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al eliminar empleados.');
+END;
+/
+
+
+Procedimiento con Cursor FOR LOOP para mostrar las ventas de empleados
+Este procedimiento usa un cursor con FOR LOOP, lo que elimina la necesidad de OPEN y FETCH.
+CREATE OR REPLACE PROCEDURE mostrar_ventas(p_mes NUMBER, p_anio NUMBER) IS
+BEGIN
+    FOR v_rec IN (SELECT e.nombre, SUM(v.monto) AS total_ventas
+                  FROM empleados e 
+                  JOIN ventas v ON e.id = v.empleado_id
+                  WHERE EXTRACT(MONTH FROM v.fecha) = p_mes 
+                  AND EXTRACT(YEAR FROM v.fecha) = p_anio
+                  GROUP BY e.nombre) 
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_rec.nombre || ' - Ventas: ' || v_rec.total_ventas);
+    END LOOP;
+END;
+/
+
+-----------------------------------------------------------------------------------------------------
+Cursor Explícito Básico – Recorrer empleados y mostrar su nombre y salario
+Este cursor obtiene los empleados y muestra sus datos uno por uno.
+DECLARE
+    -- Declaramos el cursor
+    CURSOR c_empleados IS 
+        SELECT nombre, salario FROM empleados;
+
+    -- Variables para almacenar los datos
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;  -- Abrimos el cursor
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario;  -- Extraemos un registro
+        EXIT WHEN c_empleados%NOTFOUND;  -- Salimos si no hay más registros
+
+        -- Mostramos los datos
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;  -- Cerramos el cursor
+END;
+/
+
+
+Cursor Explícito con Parámetro – Filtrar empleados por departamento
+Este cursor recibe el nombre del departamento y devuelve solo los empleados de esa área
+DECLARE
+    CURSOR c_empleados(p_departamento VARCHAR2) IS 
+        SELECT nombre, salario FROM empleados WHERE departamento = p_departamento;
+
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados('Ventas');  -- Filtramos por el departamento "Ventas"
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;
+END;
+/
+
+
+Cursor Explícito con Manejo de Excepciones – Evitar errores si no hay empleados
+Este cursor maneja la excepción cuando no se encuentran empleados en la consulta
+DECLARE
+    CURSOR c_empleados IS 
+        SELECT nombre, salario FROM empleados WHERE departamento = 'Recursos Humanos';
+
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+    v_contador NUMBER := 0;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        v_contador := v_contador + 1;
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;
+
+    -- Si no se encontró ningún empleado, mostramos un mensaje
+    IF v_contador = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No hay empleados en Recursos Humanos.');
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado.');
+END;
+/
+
+
+Cursor con FOR LOOP (Sin Necesidad de OPEN y FETCH)
+El FOR LOOP maneja automáticamente la apertura, extracción y cierre del cursor.
+BEGIN
+    FOR empleado IN (SELECT nombre, salario FROM empleados WHERE salario > 3000) LOOP
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || empleado.nombre || ' - Salario: ' || empleado.salario);
+    END LOOP;
+END;
+/
+
+
+Cursor con Actualización de Registros (FOR UPDATE)
+Este cursor permite modificar datos dentro del FETCH.
+DECLARE
+    CURSOR c_empleados IS 
+        SELECT id, salario FROM empleados WHERE salario < 4000 FOR UPDATE;
+
+    v_id empleados.id%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_id, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        -- Aumentamos el salario en un 10%
+        UPDATE empleados SET salario = salario * 1.10 WHERE id = v_id;
+        DBMS_OUTPUT.PUT_LINE('Aumento aplicado a empleado ID: ' || v_id);
+    END LOOP;
+    CLOSE c_empleados;
+
+    COMMIT;  -- Guardamos los cambios
+END;
+/
+
+
+Cursor con Múltiples Tablas (Join en un Cursor)
+Este cursor obtiene empleados junto con el nombre de su departamento
+DECLARE
+    CURSOR c_empleados IS 
+        SELECT e.nombre, e.salario, d.nombre AS departamento
+        FROM empleados e
+        JOIN departamentos d ON e.departamento_id = d.id;
+
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+    v_departamento departamentos.nombre%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario, v_departamento;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario || ' - Departamento: ' || v_departamento);
+    END LOOP;
+    CLOSE c_empleados;
+END;
+/
+
+
+----------------------------------------------------------
+TIPO EXAMEN
+
+EJERCICIO 1 – Procedimiento para listar empleados de un departamento
+Pregunta:
+Crea un procedimiento llamado listar_empleados_departamento que reciba 
+un nombre de departamento y muestre los nombres y salarios de los empleados que trabajan allí.
+CREATE OR REPLACE PROCEDURE listar_empleados_departamento(p_departamento VARCHAR2) IS
+    CURSOR c_empleados IS
+        SELECT nombre, salario FROM empleados WHERE departamento = p_departamento;
+
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_nombre || ' - Salario: ' || v_salario);
+    END LOOP;
+    CLOSE c_empleados;
+END;
+/
+
+
+EJERCICIO 2 – Función para calcular el salario promedio de un departamento
+Pregunta:
+Crea una función llamada salario_promedio que reciba un nombre de departamento 
+y devuelva el salario promedio de los empleados de ese departamento.
+CREATE OR REPLACE FUNCTION salario_promedio(p_departamento VARCHAR2) RETURN NUMBER IS
+    CURSOR c_salarios IS
+        SELECT salario FROM empleados WHERE departamento = p_departamento;
+
+    v_salario empleados.salario%TYPE;
+    v_total NUMBER := 0;
+    v_count NUMBER := 0;
+BEGIN
+    OPEN c_salarios;
+    LOOP
+        FETCH c_salarios INTO v_salario;
+        EXIT WHEN c_salarios%NOTFOUND;
+        v_total := v_total + v_salario;
+        v_count := v_count + 1;
+    END LOOP;
+    CLOSE c_salarios;
+
+    IF v_count = 0 THEN
+        RETURN NULL;
+    ELSE
+        RETURN v_total / v_count;
+    END IF;
+END;
+/
+
+
+EJERCICIO 3 – Procedimiento para eliminar empleados con salarios bajos
+Pregunta:
+Crea un procedimiento llamado eliminar_empleados_bajos que elimine empleados 
+cuyo salario sea menor a un valor dado y guarde sus datos en una tabla empleados_eliminados.
+CREATE OR REPLACE PROCEDURE eliminar_empleados_bajos(p_salario_min NUMBER) IS
+    CURSOR c_empleados IS
+        SELECT id, nombre, salario FROM empleados WHERE salario < p_salario_min FOR UPDATE;
+
+    v_id empleados.id%TYPE;
+    v_nombre empleados.nombre%TYPE;
+    v_salario empleados.salario%TYPE;
+BEGIN
+    OPEN c_empleados;
+    LOOP
+        FETCH c_empleados INTO v_id, v_nombre, v_salario;
+        EXIT WHEN c_empleados%NOTFOUND;
+
+        INSERT INTO empleados_eliminados (id, nombre, salario, fecha_baja)
+        VALUES (v_id, v_nombre, v_salario, SYSDATE);
+
+        DELETE FROM empleados WHERE id = v_id;
+    END LOOP;
+    CLOSE c_empleados;
+
+    COMMIT;
+END;
+/
+
+
+EJERCICIO 4 – Función para obtener el nombre del empleado con mayor salario
+Pregunta:
+Crea una función mejor_pagado que devuelva el nombre del empleado con el salario más alto de la empresa.
+CREATE OR REPLACE FUNCTION mejor_pagado RETURN VARCHAR2 IS
+    v_nombre empleados.nombre%TYPE;
+BEGIN
+    SELECT nombre INTO v_nombre FROM empleados
+    ORDER BY salario DESC
+    FETCH FIRST 1 ROW ONLY;
+
+    RETURN v_nombre;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No hay empleados en la base de datos';
+END;
+/
+
+
+EJERCICIO 5 – Procedimiento para actualizar salarios con un porcentaje
+Pregunta:
+Crea un procedimiento incrementar_salarios que reciba un porcentaje y aumente el salario de todos los empleados en esa cantidad.
+CREATE OR REPLACE PROCEDURE incrementar_salarios(p_porcentaje NUMBER) IS
+BEGIN
+    UPDATE empleados
+    SET salario = salario + (salario * p_porcentaje / 100);
+    
+    COMMIT;
+END;
+/
+
+
+EJERCICIO 6 – Procedimiento que muestra ventas por empleado con FOR LOOP
+Pregunta:
+Crea un procedimiento ventas_por_empleado que reciba un mes y año, y muestre las ventas totales de cada empleado en ese periodo.
+CREATE OR REPLACE PROCEDURE ventas_por_empleado(p_mes NUMBER, p_anio NUMBER) IS
+BEGIN
+    FOR v_rec IN (SELECT e.nombre, SUM(v.monto) AS total_ventas
+                  FROM empleados e
+                  JOIN ventas v ON e.id = v.empleado_id
+                  WHERE EXTRACT(MONTH FROM v.fecha) = p_mes 
+                  AND EXTRACT(YEAR FROM v.fecha) = p_anio
+                  GROUP BY e.nombre) 
+    LOOP
+        DBMS_OUTPUT.PUT_LINE('Empleado: ' || v_rec.nombre || ' - Ventas: ' || v_rec.total_ventas);
+    END LOOP;
+END;
+/
+
+
+EJERCICIO 7 – Procedimiento que transfiere empleados a otro departamento
+Pregunta:
+Crea un procedimiento transferir_empleados que mueva empleados de un departamento a otro.
+CREATE OR REPLACE PROCEDURE transferir_empleados(p_departamento_origen VARCHAR2, p_departamento_destino VARCHAR2) IS
+BEGIN
+    UPDATE empleados
+    SET departamento = p_departamento_destino
+    WHERE departamento = p_departamento_origen;
+
+    COMMIT;
+END;
+/
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+EXAMEN CON JAVA
+
+Ejemplo de Procedimiento: Insertar un Dron
+CREATE OR REPLACE PROCEDURE insertar_dron(
+    p_nserie IN VARCHAR2,
+    p_marca IN VARCHAR2,
+    p_modelo IN VARCHAR2,
+    p_peso IN NUMBER,
+    p_potencia IN NUMBER,
+    p_ecinetica IN NUMBER,
+    p_aseguradora IN VARCHAR2,
+    p_horas IN NUMBER,
+    p_autonomia IN NUMBER,
+    p_adquisicion IN DATE,
+    p_dni IN VARCHAR2
+) AS
+BEGIN
+    INSERT INTO DRONES (NSERIE, MARCA, MODELO, PESO, POTENCIA, ECINETICA, ASEGURADORA, HORAS, AUTONOMIA, ADQUISICION, DNI)
+    VALUES (p_nserie, p_marca, p_modelo, p_peso, p_potencia, p_ecinetica, p_aseguradora, p_horas, p_autonomia, p_adquisicion, p_dni);
+    
+    COMMIT;
+EXCEPTION
+    WHEN DUP_VAL_ON_INDEX THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El dron ya existe.');
+    WHEN OTHERS THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Error al insertar el dron.');
+END insertar_dron;
+/
+
+public void insertarDron(String nSerie, String marca, String modelo, double peso, int potencia, int ecinetica, String aseguradora, double horas, double autonomia, Date adquisicion, String DNI) {
+    String sql = "{ call insertar_dron(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) }";
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.setString(1, nSerie);
+        cs.setString(2, marca);
+        cs.setString(3, modelo);
+        cs.setDouble(4, peso);
+        cs.setInt(5, potencia);
+        cs.setInt(6, ecinetica);
+        cs.setString(7, aseguradora);
+        cs.setDouble(8, horas);
+        cs.setDouble(9, autonomia);
+        cs.setDate(10, adquisicion);
+        cs.setString(11, DNI);
+
+        cs.execute();
+        System.out.println("Dron insertado correctamente.");
+    } catch (SQLException e) {
+        System.out.println("Error al insertar dron: " + e.getMessage());
+    }
+}
+
+
+
+
+Ejemplo de Función: Obtener el Número de Drones de un Operador
+CREATE OR REPLACE FUNCTION contar_drones_operador(
+    p_dni IN VARCHAR2
+) RETURN NUMBER AS
+    v_total NUMBER := 0;
+BEGIN
+    SELECT COUNT(*) INTO v_total FROM DRONES WHERE DNI = p_dni;
+    RETURN v_total;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN -1;
+END contar_drones_operador;
+/
+
+public int contarDronesPorOperador(String dni) {
+    String sql = "{ ? = call contar_drones_operador(?) }";
+    int totalDrones = 0;
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.registerOutParameter(1, Types.INTEGER);
+        cs.setString(2, dni);
+        cs.execute();
+        totalDrones = cs.getInt(1);
+    } catch (SQLException e) {
+        System.out.println("Error al contar drones: " + e.getMessage());
+    }
+    
+    return totalDrones;
+}
+
+
+
+Ejemplo de Procedimiento con Cursor: Listar Drones por Rango de Autonomía
+CREATE OR REPLACE PROCEDURE listar_drones_autonomia(
+    p_min_autonomia IN NUMBER,
+    p_max_autonomia IN NUMBER,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+    SELECT NSERIE, MARCA, MODELO, AUTONOMIA
+    FROM DRONES
+    WHERE AUTONOMIA BETWEEN p_min_autonomia AND p_max_autonomia;
+END listar_drones_autonomia;
+/
+
+public void listarDronesPorAutonomia(double minAutonomia, double maxAutonomia) {
+    String sql = "{ call listar_drones_autonomia(?, ?, ?) }";
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.setDouble(1, minAutonomia);
+        cs.setDouble(2, maxAutonomia);
+        cs.registerOutParameter(3, OracleTypes.CURSOR);
+        cs.execute();
+        
+        ResultSet rs = (ResultSet) cs.getObject(3);
+        while (rs.next()) {
+            System.out.println("NSERIE: " + rs.getString("NSERIE") + 
+                               ", MARCA: " + rs.getString("MARCA") +
+                               ", MODELO: " + rs.getString("MODELO") +
+                               ", AUTONOMIA: " + rs.getDouble("AUTONOMIA"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar drones: " + e.getMessage());
+    }
+}
+
+
+
+Procedimiento Complejo: Transferir un Dron entre Operadores
+📌 SQL Developer (Creación del Procedimiento)
+Este procedimiento transfiere un dron de un operador a otro. Valida que el dron exista, 
+que el nuevo operador exista y actualiza la información en la base de datos.
+CREATE OR REPLACE PROCEDURE transferir_dron(
+    p_nserie IN VARCHAR2,
+    p_dni_nuevo IN VARCHAR2
+) AS
+    v_count NUMBER;
+BEGIN
+    -- Validar si el dron existe
+    SELECT COUNT(*) INTO v_count FROM DRONES WHERE NSERIE = p_nserie;
+    IF v_count = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El dron no existe.');
+    END IF;
+
+    -- Validar si el nuevo operador existe
+    SELECT COUNT(*) INTO v_count FROM OPERADORES WHERE DNI = p_dni_nuevo;
+    IF v_count = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'El nuevo operador no existe.');
+    END IF;
+
+    -- Actualizar el dron con el nuevo operador
+    UPDATE DRONES SET DNI = p_dni_nuevo WHERE NSERIE = p_nserie;
+    
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE_APPLICATION_ERROR(-20003, 'Error en la transferencia del dron.');
+END transferir_dron;
+/
+
+public void transferirDron(String nSerie, String nuevoDni) {
+    String sql = "{ call transferir_dron(?, ?) }";
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.setString(1, nSerie);
+        cs.setString(2, nuevoDni);
+        cs.execute();
+        System.out.println("Dron transferido correctamente.");
+    } catch (SQLException e) {
+        System.out.println("Error en la transferencia del dron: " + e.getMessage());
+    }
+}
+
+
+
+
+Función Compleja: Calcular Promedio de Autonomía de Drones por Operador
+📌 SQL Developer (Creación de la Función)
+Esta función devuelve el promedio de autonomía de los drones de un operador. 
+Si no tiene drones, devuelve NULL.
+CREATE OR REPLACE FUNCTION promedio_autonomia_operador(
+    p_dni IN VARCHAR2
+) RETURN NUMBER AS
+    v_promedio NUMBER;
+BEGIN
+    SELECT AVG(AUTONOMIA) INTO v_promedio
+    FROM DRONES
+    WHERE DNI = p_dni;
+    
+    RETURN v_promedio;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+    WHEN OTHERS THEN
+        RETURN -1;
+END promedio_autonomia_operador;
+/
+
+public double calcularPromedioAutonomia(String dni) {
+    String sql = "{ ? = call promedio_autonomia_operador(?) }";
+    double promedio = 0;
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.registerOutParameter(1, Types.DOUBLE);
+        cs.setString(2, dni);
+        cs.execute();
+        promedio = cs.getDouble(1);
+        
+        if (cs.wasNull()) {
+            System.out.println("El operador no tiene drones registrados.");
+            return -1;
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al calcular promedio de autonomía: " + e.getMessage());
+    }
+    
+    return promedio;
+}
+
+
+
+Procedimiento con Cursor Avanzado: Listar Drones con Mantenimiento Pendiente
+📌 SQL Developer (Creación del Procedimiento con Cursor)
+Este procedimiento devuelve un cursor con drones que necesitan mantenimiento basado en su número de horas de vuelo
+CREATE OR REPLACE PROCEDURE listar_drones_mantenimiento(
+    p_horas_max IN NUMBER,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+    SELECT NSERIE, MARCA, MODELO, HORAS
+    FROM DRONES
+    WHERE HORAS > p_horas_max;
+END listar_drones_mantenimiento;
+/
+
+public void listarDronesMantenimiento(double horasMaximas) {
+    String sql = "{ call listar_drones_mantenimiento(?, ?) }";
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.setDouble(1, horasMaximas);
+        cs.registerOutParameter(2, OracleTypes.CURSOR);
+        cs.execute();
+        
+        ResultSet rs = (ResultSet) cs.getObject(2);
+        while (rs.next()) {
+            System.out.println("NSERIE: " + rs.getString("NSERIE") + 
+                               ", MARCA: " + rs.getString("MARCA") +
+                               ", MODELO: " + rs.getString("MODELO") +
+                               ", HORAS: " + rs.getDouble("HORAS"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar drones: " + e.getMessage());
+    }
+}
+
+
+
+
+Procedimiento con Cursores Anidados: Obtener Operadores y sus Drones
+📌 SQL Developer (Creación del Procedimiento)
+Este procedimiento usa un cursor anidado para obtener todos los operadores y sus drones.
+CREATE OR REPLACE PROCEDURE obtener_operadores_y_drones(
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+    SELECT o.DNI, o.NOMBRE, 
+           (SELECT COUNT(*) FROM DRONES d WHERE d.DNI = o.DNI) AS NUM_DRONES
+    FROM OPERADORES o;
+END obtener_operadores_y_drones;
+/
+
+public void obtenerOperadoresYDrones() {
+    String sql = "{ call obtener_operadores_y_drones(?) }";
+    
+    try (CallableStatement cs = conexion.prepareCall(sql)) {
+        cs.registerOutParameter(1, OracleTypes.CURSOR);
+        cs.execute();
+        
+        ResultSet rs = (ResultSet) cs.getObject(1);
+        while (rs.next()) {
+            System.out.println("DNI: " + rs.getString("DNI") + 
+                               ", Nombre: " + rs.getString("NOMBRE") +
+                               ", Drones Asignados: " + rs.getInt("NUM_DRONES"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener operadores y drones: " + e.getMessage());
+    }
+}
+
