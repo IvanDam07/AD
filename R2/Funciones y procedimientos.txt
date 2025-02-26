@@ -937,3 +937,123 @@ public void obtenerOperadoresYDrones() {
     }
 }
 
+
+------------------------------------------------------------------------------------------
+RESULT SET
+
+Nivel Básico: Listar Todos los Operadores
+📌 Objetivo: Obtener y mostrar todos los operadores registrados en la base de datos.
+📌 Conceptos clave: Consulta simple con ResultSet, iteración con while.
+ Examen Tipo: Pregunta directa: "Implementa un método para listar operadores usando ResultSet".
+public void listarOperadores() {
+    String sql = "SELECT DNI, NOMBRE, APELLIDOS FROM OPERADORES";
+
+    try (Statement stmt = conexion.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        
+        while (rs.next()) {
+            System.out.println("DNI: " + rs.getString("DNI") +
+                               ", Nombre: " + rs.getString("NOMBRE") +
+                               ", Apellidos: " + rs.getString("APELLIDOS"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar operadores: " + e.getMessage());
+    }
+}
+
+
+Nivel Intermedio: Listar Drones de un Operador Específico
+📌 Objetivo: Mostrar los drones que pertenecen a un operador en específico.
+📌 Conceptos clave: Uso de PreparedStatement, consulta con WHERE.
+Examen Tipo: Pregunta práctica: "Dado un DNI de operador, muestra los drones asociados usando ResultSet
+public void listarDronesPorOperador(String dniOperador) {
+    String sql = "SELECT NSERIE, MARCA, MODELO FROM DRONES WHERE DNI = ?";
+
+    try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+        ps.setString(1, dniOperador);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            System.out.println("Nº Serie: " + rs.getString("NSERIE") +
+                               ", Marca: " + rs.getString("MARCA") +
+                               ", Modelo: " + rs.getString("MODELO"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar drones del operador: " + e.getMessage());
+    }
+}
+
+
+Nivel Avanzado: Obtener Dron con Mayor Autonomía
+📌 Objetivo: Encontrar el dron con mayor autonomía en la base de datos.
+📌 Conceptos clave: Uso de ORDER BY, LIMIT en bases de datos compatibles o MAX().
+✅ Examen Tipo: "Encuentra el dron con mayor autonomía en la base de datos y muéstralo en consola".
+public void obtenerDronMayorAutonomia() {
+    String sql = "SELECT NSERIE, MARCA, MODELO, AUTONOMIA FROM DRONES ORDER BY AUTONOMIA DESC FETCH FIRST 1 ROWS ONLY";
+
+    try (Statement stmt = conexion.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        
+        if (rs.next()) {
+            System.out.println("Dron con mayor autonomía:");
+            System.out.println("Nº Serie: " + rs.getString("NSERIE") +
+                               ", Marca: " + rs.getString("MARCA") +
+                               ", Modelo: " + rs.getString("MODELO") +
+                               ", Autonomía: " + rs.getDouble("AUTONOMIA") + " minutos");
+        } else {
+            System.out.println("No hay drones en la base de datos.");
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener el dron con mayor autonomía: " + e.getMessage());
+    }
+}
+
+
+
+Nivel Experto: Listar Operadores con Cantidad de Drones
+📌 Objetivo: Obtener operadores junto con la cantidad de drones que poseen.
+📌 Conceptos clave: Uso de JOIN, GROUP BY, COUNT(*).
+✅ Examen Tipo: "Lista todos los operadores y la cantidad de drones que poseen".
+public void listarOperadoresConCantidadDrones() {
+    String sql = "SELECT o.DNI, o.NOMBRE, COUNT(d.NSERIE) AS TOTAL_DRONES " +
+                 "FROM OPERADORES o " +
+                 "LEFT JOIN DRONES d ON o.DNI = d.DNI " +
+                 "GROUP BY o.DNI, o.NOMBRE " +
+                 "ORDER BY TOTAL_DRONES DESC";
+
+    try (Statement stmt = conexion.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+        
+        while (rs.next()) {
+            System.out.println("DNI: " + rs.getString("DNI") +
+                               ", Nombre: " + rs.getString("NOMBRE") +
+                               ", Total Drones: " + rs.getInt("TOTAL_DRONES"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al obtener operadores con cantidad de drones: " + e.getMessage());
+    }
+}
+
+
+Nivel Desafío: Listar los Últimos Drones Añadidos
+📌 Objetivo: Obtener los drones más recientes registrados en la base de datos.
+📌 Conceptos clave: Uso de ORDER BY y FETCH FIRST N ROWS ONLY o LIMIT.
+✅ Examen Tipo: "Implementa un método que devuelva los últimos N drones añadidos a la base de datos".
+public void listarUltimosDrones(int cantidad) {
+    String sql = "SELECT NSERIE, MARCA, MODELO, FECHA_REGISTRO FROM DRONES " +
+                 "ORDER BY FECHA_REGISTRO DESC FETCH FIRST ? ROWS ONLY";
+
+    try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+        ps.setInt(1, cantidad);
+        ResultSet rs = ps.executeQuery();
+        
+        while (rs.next()) {
+            System.out.println("Nº Serie: " + rs.getString("NSERIE") +
+                               ", Marca: " + rs.getString("MARCA") +
+                               ", Modelo: " + rs.getString("MODELO") +
+                               ", Fecha de Registro: " + rs.getDate("FECHA_REGISTRO"));
+        }
+    } catch (SQLException e) {
+        System.out.println("Error al listar los últimos drones: " + e.getMessage());
+    }
+}
